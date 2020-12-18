@@ -9,7 +9,8 @@ public class BubblePOP : PhysicsGame
 {
     
 
-    private int BUBBLES = 1;
+    private int BUBBLES = 5;
+    public int pallojaCount = 0;
 
     private Image mapImage = LoadImage("map");  
     private Shape mapShape;
@@ -19,13 +20,12 @@ public class BubblePOP : PhysicsGame
     List<PhysicsObject> balls = new List<PhysicsObject> ();
 
     IntMeter scoreCounter;
+    Timer timer = new Timer();
 
     public override void Begin()
     {
         Gravity = new Vector(0.0, -200);
         CreateScoreCounter();
-
-        Timer timer = new Timer(); // kuinka ajastaa väli Populatelle
 
         mapShape = Shape.FromImage(mapImage);
         CreateLevel();
@@ -44,11 +44,11 @@ public class BubblePOP : PhysicsGame
     //    Mouse.Listen(MouseButton.Left, ButtonState.Pressed, bubblePop, "Bubble(s) popped!");
     }
 
-    private void bubblePop(PhysicsObject bubble)
+    private void BubblePop(PhysicsObject bubble)
     {
         bubble.Destroy();
         balls.Remove(bubble);
-        //connecting bubbles
+        //if (bubble.Color) BubblePOP(this);
         scoreCounter.Value += 1;
         scoreCounter.UpperLimit += KaikkiKeratty;
     }
@@ -60,15 +60,22 @@ public class BubblePOP : PhysicsGame
         Add(map);
     }
 
-    private void Populate()
+    void Populate()
     {
         Vector position = new Vector(0, 400);
 
+        Timer.CreateAndStart(0.2, delegate { CreateBubble(position); }
+            );
+        if (pallojaCount < BUBBLES) timer.Stop();
+        /*  
         for (int i = 0; i < BUBBLES; i++)
-        {
-            CreateBubble(position);
-           
-        }
+          {
+            timer.Stop();  
+            //Timer.SingleShot(0.2,
+                 // delegate { CreateBubble(position); }
+                 // );
+          }
+        */
 
     }
 
@@ -81,9 +88,10 @@ public class BubblePOP : PhysicsGame
         Bubble.Position = position;
         Bubble.Mass = 15.0;
         Bubble.Restitution = 0.1;
+        pallojaCount++;
         Add(Bubble);
         balls.Add(Bubble);
-        Mouse.ListenOn(Bubble, MouseButton.Left, ButtonState.Pressed, bubblePop, null, Bubble);
+        Mouse.ListenOn(Bubble, MouseButton.Left, ButtonState.Pressed, BubblePop, null, Bubble);
         
 
 
