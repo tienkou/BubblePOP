@@ -18,16 +18,19 @@ public class BubblePOP : PhysicsGame
 
     List<PhysicsObject> balls = new List<PhysicsObject> ();
 
-
+    IntMeter scoreCounter;
 
     public override void Begin()
     {
         Gravity = new Vector(0.0, -200);
+        CreateScoreCounter();
+
         Timer timer = new Timer(); // kuinka ajastaa väli Populatelle
 
         mapShape = Shape.FromImage(mapImage);
         CreateLevel();
         Populate();
+
 
 
         
@@ -46,6 +49,8 @@ public class BubblePOP : PhysicsGame
         bubble.Destroy();
         balls.Remove(bubble);
         //connecting bubbles
+        scoreCounter.Value += 1;
+        scoreCounter.UpperLimit += KaikkiKeratty;
     }
 
     private void CreateLevel()
@@ -79,15 +84,31 @@ public class BubblePOP : PhysicsGame
         Add(Bubble);
         balls.Add(Bubble);
         Mouse.ListenOn(Bubble, MouseButton.Left, ButtonState.Pressed, bubblePop, null, Bubble);
-
+        
 
 
         // Softness voi olla olennainen game feeling kannalta? https://trac.cc.jyu.fi/projects/npo/wiki/OliotJaSelitykset#Tärkeimmätominaisuudet5
     }
 
+    void CreateScoreCounter ()
+    {
+        scoreCounter = new IntMeter(0);
+        scoreCounter.MaxValue = 1;
 
-    
+        Label scoreLabel = new Label();
+        scoreLabel.Y  =+ 300;
+        scoreLabel.TextColor = Color.Yellow;
+        scoreLabel.Color = Color.Black;
 
+        scoreLabel.BindTo(scoreCounter);
+        Add(scoreLabel);
+    }
+
+
+    void KaikkiKeratty()
+    {
+        MessageDisplay.Add("Pelaaja 1 voitti pelin.");
+    }
 
 }
 

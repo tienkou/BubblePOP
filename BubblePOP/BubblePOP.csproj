@@ -13,8 +13,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="bin\Debug\netcoreapp3.1\Content\" />
       <Folder Include="Content\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="bin\Debug\netcoreapp3.1\Content\map.png" />
     </ItemGroup>
 </Project>
 
