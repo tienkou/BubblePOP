@@ -30,15 +30,11 @@ public class BubblePOP : PhysicsGame
     public override void Begin()
     {
         Gravity = new Vector(0.0, -200);
-        CreateScoreCounter();
+        PlayerMotivator();
 
         mapShape = Shape.FromImage(mapImage);
         CreateLevel();
         Populate();
-
-
-
-        
 
         PhoneBackButton.Listen(ConfirmExit, "Lopeta peli");
         Keyboard.Listen(Key.Escape, ButtonState.Pressed, ConfirmExit, "Lopeta peli");
@@ -48,14 +44,16 @@ public class BubblePOP : PhysicsGame
     {
     //    Mouse.Listen(MouseButton.Left, ButtonState.Pressed, bubblePop, "Bubble(s) popped!");
     }
-
+    /// <summary>
+    /// Takes care everything to do with Bubble destruction.
+    /// </summary>
+    /// <param name="bubble"></param>
     private void BubblePop(PhysicsObject bubble)
     {
         bubble.Destroy();
         bubbles.Remove(bubble);
         double distance = 0.0;
-
-
+        int scoreMultiplier = 1;
 
         for (int i = 0; i < bubbles.Count; i++)
         {
@@ -64,14 +62,18 @@ public class BubblePOP : PhysicsGame
             {
                 BubblePop(bubbles[i]);
                 i--;
+                scoreMultiplier++;
             }
         }
-        
 
-        scoreCounter.Value += 1;
-        scoreCounter.UpperLimit += KaikkiKeratty;
+        scoreCounter.Value += 1 * scoreMultiplier;
+        scoreCounter.UpperLimit += EndGame;
+        if (bubbles.Count <= 0) Lost();
     }
 
+    /// <summary>
+    /// Sets up the level.
+    /// </summary>
     private void CreateLevel()
     {
         PhysicsObject map = PhysicsObject.CreateStaticObject(800, 600, mapShape);
@@ -79,13 +81,15 @@ public class BubblePOP : PhysicsGame
         Add(map);
     }
 
+    /// <summary>
+    /// Populates the game with predetermined colors and amounts of bubbles.
+    /// </summary>
     private void Populate()
     {
         Vector position = new Vector(0, 400);
 
         for (int i = 0; i < BUBBLES; i++)
           {
-            //timer.Stop();  
             Timer.SingleShot(0.1+0.1*i,
                  delegate { CreateBubble(position); }
                  );
@@ -94,7 +98,7 @@ public class BubblePOP : PhysicsGame
 
     }
     /// <summary>
-    /// 
+    /// One bubble is created.
     /// </summary>
     /// <param name="position"></param>
     private void CreateBubble(Vector position)
@@ -110,34 +114,69 @@ public class BubblePOP : PhysicsGame
         Add(Bubble);
         bubbles.Add(Bubble);
         Mouse.ListenOn(Bubble, MouseButton.Left, ButtonState.Pressed, BubblePop, null, Bubble);
-        
-
-
-        // Softness voi olla olennainen game feeling kannalta? https://trac.cc.jyu.fi/projects/npo/wiki/OliotJaSelitykset#Tärkeimmätominaisuudet5
+       
     }
 
-    private void CreateScoreCounter ()
+    /// <summary>
+    /// Takes care of score counter, goal label and other UI. 
+    /// </summary>
+    private void PlayerMotivator ()
     {
-        int tempScore = BUBBLES;
+        
         scoreCounter = new IntMeter(0);
-        scoreCounter.MaxValue = tempScore - (int)(tempScore * 0.75);
+        scoreCounter.MaxValue = DifficultyAutomator(BUBBLES, 2);
 
         Label scoreLabel = new Label();
         scoreLabel.Y += 300;
         scoreLabel.TextColor = Color.Yellow;
         scoreLabel.Color = Color.Black;
+        scoreLabel.Title = "Score";
 
         scoreLabel.BindTo(scoreCounter);
         Add(scoreLabel);
+
+        Label goalLabel = new Label();
+        goalLabel.Y += 200;
+        goalLabel.TextColor = Color.BrightGreen;
+        goalLabel.Color = Color.Black;
+
+        goalLabel.Title = "Goal";
+        goalLabel.Text = scoreCounter.MaxValue.ToString();
+        Add(goalLabel);
+
+        Label goalLabelText = new Label();
+        goalLabelText.Y += 225;
+        goalLabelText.TextColor = Color.BrightGreen;
+        goalLabelText.Color = Color.Black;
+
+        goalLabelText.Text = "Reach Goal to WIN";
+        Add(goalLabelText);
     }
 
-
-    //#TODO: Funktio jolla on attribuutteja ja palauttaa sen
-    //scoreCounter.MaxValue = tempScore - (int) (tempScore* 0.75);
-
-    private void KaikkiKeratty()
+    /// <summary>
+    /// Calculates SCIENTIFIC OPTIMUM FUN™ for the player.
+    /// </summary>
+    /// <param name="maxObjects">Maximum interactable objects in the game</param>
+    /// <param name="difficultyFactor">Magic number to adjust player difficulty</param>
+    /// <returns></returns>
+    private static int DifficultyAutomator(int maxObjects, double difficultyFactor)
     {
-        MessageDisplay.Add("Pelaaja 1 voitti pelin.");
+        int tempScore = maxObjects;
+        
+        return (int)(tempScore * difficultyFactor); //why is this always 15? wtf
+    }
+
+    /// <summary>
+    /// Rewards winning player. Everybody is a winner.
+    /// </summary>
+    private void EndGame()
+    {
+        MessageDisplay.Add("You are the winner!");
+    }
+
+    private void Lost()
+    {
+        MessageDisplay.Add("Bubbles are gone? Try again! Longer chains help with score multipliers!");
     }
 
 }
