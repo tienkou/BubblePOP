@@ -22,7 +22,7 @@ public class BubblePOP : PhysicsGame
     private PhysicsObject Bubble;
 
     List<PhysicsObject> bubbles = new List<PhysicsObject> ();
-    List<Color> bubbleColors = new List<Color> {Color.Yellow, Color.White, Color.Blue, Color.Green, Color.HotPink };
+    List<Color> bubbleColors = new List<Color> {Color.DarkForestGreen, Color.DarkBlue, Color.DarkMagenta, Color.Gold, Color.Red };
 
     IntMeter scoreCounter;
     Timer timer = new Timer();
