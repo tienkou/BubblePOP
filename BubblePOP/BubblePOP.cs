@@ -79,11 +79,11 @@ public class BubblePOP : PhysicsGame
         Vector position = new Vector(0, 400);
 
         for (int i = 0; i < BUBBLES; i++)
-            {
+        {
             Timer.SingleShot(0.1+0.1*i,
-                delegate { CreateBubble(position); }
-                );
-            }
+            delegate { CreateBubble(position); }
+            );
+        }
     }
 
 
