@@ -1,31 +1,21 @@
-using System;
 using System.Collections.Generic;
 using Jypeli;
-using Jypeli.Assets;
-using Jypeli.Controls;
-using Jypeli.Widgets;
-
 /// <summary>
 /// @author Harja "tienkou" Jonne
 /// @version 1.0 - gold
 /// </summary>
 public class BubblePOP : PhysicsGame
 {
-    
-
     private int BUBBLES = 75;
-    private int pallojaCount = 0;
 
     private Image mapImage = LoadImage("map");  
     private Shape mapShape;
 
-    private PhysicsObject Bubble;
+    private List<PhysicsObject> bubbles = new List<PhysicsObject> ();
+    private List<Color> bubbleColors = new List<Color> {Color.DarkForestGreen, Color.DarkBlue, Color.DarkMagenta, Color.Gold, Color.Red };
 
-    List<PhysicsObject> bubbles = new List<PhysicsObject> ();
-    List<Color> bubbleColors = new List<Color> {Color.DarkForestGreen, Color.DarkBlue, Color.DarkMagenta, Color.Gold, Color.Red };
-
-    IntMeter scoreCounter;
-    Timer timer = new Timer();
+    private IntMeter scoreCounter;
+    private Timer timer = new Timer();
 
     public override void Begin()
     {
@@ -40,25 +30,23 @@ public class BubblePOP : PhysicsGame
         Keyboard.Listen(Key.Escape, ButtonState.Pressed, ConfirmExit, "Lopeta peli");
     }
 
-    private void PlayerController()
-    {
-    //    Mouse.Listen(MouseButton.Left, ButtonState.Pressed, bubblePop, "Bubble(s) popped!");
-    }
+
     /// <summary>
-    /// Takes care everything to do with Bubble destruction.
+    /// Takes care everything to do with bubble destruction.
     /// </summary>
-    /// <param name="bubble"></param>
+    /// <param name="bubble">Bubble that is going to burst and take down it's mates</param>
     private void BubblePop(PhysicsObject bubble)
     {
         bubble.Destroy();
         bubbles.Remove(bubble);
         double distance = 0.0;
         int scoreMultiplier = 1;
+        int maxDistance = 60;
 
         for (int i = 0; i < bubbles.Count; i++)
         {
             distance = Vector.Distance(bubble.Position, bubbles[i].Position);
-            if (bubble.Color == bubbles[i].Color && distance < 60) 
+            if (bubble.Color == bubbles[i].Color && distance < maxDistance) 
             {
                 BubblePop(bubbles[i]);
                 i--;
@@ -71,6 +59,7 @@ public class BubblePOP : PhysicsGame
         if (bubbles.Count <= 0) Lost();
     }
 
+
     /// <summary>
     /// Sets up the level.
     /// </summary>
@@ -81,6 +70,7 @@ public class BubblePOP : PhysicsGame
         Add(map);
     }
 
+
     /// <summary>
     /// Populates the game with predetermined colors and amounts of bubbles.
     /// </summary>
@@ -89,40 +79,37 @@ public class BubblePOP : PhysicsGame
         Vector position = new Vector(0, 400);
 
         for (int i = 0; i < BUBBLES; i++)
-          {
+            {
             Timer.SingleShot(0.1+0.1*i,
-                 delegate { CreateBubble(position); }
-                 );
-          }
-       
-
+                delegate { CreateBubble(position); }
+                );
+            }
     }
+
+
     /// <summary>
     /// One bubble is created.
     /// </summary>
-    /// <param name="position"></param>
+    /// <param name="position">Position where the bubble is created first</param>
     private void CreateBubble(Vector position)
     {
-        
-        Bubble = new PhysicsObject(50, 50);
-        Bubble.Shape = Shape.Circle;
-        Bubble.Color = RandomGen.SelectOne<Color>(bubbleColors); 
-        Bubble.Position = position;
-        Bubble.Mass = 15.0;
-        Bubble.Restitution = 0.1;
-        pallojaCount++;
-        Add(Bubble);
-        bubbles.Add(Bubble);
-        Mouse.ListenOn(Bubble, MouseButton.Left, ButtonState.Pressed, BubblePop, null, Bubble);
-       
+        PhysicsObject bubble = new PhysicsObject(50, 50);
+        bubble.Shape = Shape.Circle;
+        bubble.Color = RandomGen.SelectOne<Color>(bubbleColors); 
+        bubble.Position = position;
+        bubble.Mass = 15.0;
+        bubble.Restitution = 0.1;
+        Add(bubble);
+        bubbles.Add(bubble);
+        Mouse.ListenOn(bubble, MouseButton.Left, ButtonState.Pressed, BubblePop, null, bubble);
     }
+
 
     /// <summary>
     /// Takes care of score counter, goal label and other UI. 
     /// </summary>
     private void PlayerMotivator ()
     {
-        
         scoreCounter = new IntMeter(0);
         scoreCounter.MaxValue = DifficultyAutomator(BUBBLES, 2);
 
@@ -153,18 +140,20 @@ public class BubblePOP : PhysicsGame
         Add(goalLabelText);
     }
 
+
     /// <summary>
     /// Calculates SCIENTIFIC OPTIMUM FUN™ for the player.
     /// </summary>
     /// <param name="maxObjects">Maximum interactable objects in the game</param>
     /// <param name="difficultyFactor">Magic number to adjust player difficulty</param>
-    /// <returns></returns>
+    /// <returns>Optimized difficulty score</returns>
     private static int DifficultyAutomator(int maxObjects, double difficultyFactor)
     {
         int tempScore = maxObjects;
         
-        return (int)(tempScore * difficultyFactor); //why is this always 15? wtf
+        return (int)(tempScore * difficultyFactor); 
     }
+
 
     /// <summary>
     /// Rewards winning player. Everybody is a winner.
@@ -174,9 +163,12 @@ public class BubblePOP : PhysicsGame
         MessageDisplay.Add("You are the winner!");
     }
 
+
+    /// <summary>
+    /// If player doesn't reach the winning threshold this useful helpmessage is triggered.
+    /// </summary>
     private void Lost()
     {
         MessageDisplay.Add("Bubbles are gone? Try again! Longer chains help with score multipliers!");
     }
-
 }
